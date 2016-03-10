@@ -6,7 +6,7 @@ const thingShadow = require('../thing/');  // point to the thing directory of th
 var thingShadows = thingShadow({
 	keyPath: '../private.pem.key',
 	certPath:'../certificate.pem.crt',
-	caPath: '../root-CA-root',
+	caPath: '../root-CA.crt',
 	clientId:'Pi_Two',
 	region: 'us-east-1',
 	host:'A3PMDMPZDFFLBX.iot.us-east-1.amazonaws.com'
@@ -54,7 +54,7 @@ console.log(JSON.stringify(pumpState));
 
 // on connect  register thing(subscribe to shadow), then send current reported state 
 
-thignShadows.on('connect', function(){
+thingShadows.on('connect', function(){
 	var clientToken;
 
 //after connect to aws register interest in thing shadow's name 
@@ -64,7 +64,7 @@ thignShadows.on('connect', function(){
 //update the thing shadow with latest device state 
 
 	setTimeout(function(){
-		clientToken = thignShadows.update('Pi_Two', pumpState);
+		clientToken = thingShadows.update('Pi_Two', pumpState);
 	}, 2000);	
 
 });
@@ -75,7 +75,7 @@ thignShadows.on('connect', function(){
 
 thingShadows.on('status',
 	function(thingName, state, clientToken, stateObject) {
-		console.log('received ' + state + ' on ' + thingName': ' + JSON.stringify(stateObject));
+		console.log('received ' + state + ' on ' + thingName +': ' + JSON.stringify(stateObject));
 	});
 
 //acion to taket when a shadow delta messsage is received 
@@ -83,7 +83,7 @@ thingShadows.on('status',
 
 thingShadows.on('delta', 
 	function(thingName, stateObject){
-		console.log('received delta '+' on '+thignName+': ' + JSON.stringify(stateObject));
+		console.log('received delta '+' on '+thingName+': ' + JSON.stringify(stateObject));
 		if(stateObject.state.pump_mode === "ON"){
 			console.log(" CHANGING MODE -> ON ");
 			// set gpio to on
@@ -96,7 +96,7 @@ thingShadows.on('delta',
 			console.log(" chaning mode to off ");
 			setGpio(0);
 			setTimeout(function( ){
-				clientToken = thingShadows.update('Pi_Two',{"state"::{"reported":{"pump_mode":"OFF"}}});
+				clientToken = thingShadows.update('Pi_Two',{"state":{"reported":{"pump_mode":"OFF"}}});
 			},1000);
 		}
 	});
@@ -104,8 +104,8 @@ thingShadows.on('delta',
 
 //action to  if shadow times out 
 
-thingShadows.on('timeout', function(thignName, clientToken){
-	console.log('received time out' + 'on' + thignName': ' + clientToken);
+thingShadows.on('timeout', function(thingName, clientToken){
+	console.log('received time out' + 'on' + thignName +': ' + clientToken);
 });
 
 
